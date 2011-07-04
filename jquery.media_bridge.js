@@ -17,12 +17,11 @@
 			flashvars		= {},
 			wrapper 		= jQuery("<div class='media-wrapper'></div>"),
 			swf_wrapper 	= jQuery("<div class='media-swf-wrapper'></div>"),
-			root_element	= element.get(0),
+			bridge			= element.get(0),
 			embed_html,
 			domid,
 			events,
 			flash_api,
-			api = root_element,
 			controls = {},
 			control_pane,
 			native_support;
@@ -44,6 +43,7 @@
 			flashvars.element    = domid;
 			flashvars.src 	     = source;
 			flashvars.media_type = media_type;
+			if( options.debug ) flashvars.debug = options.debug;
 			if( is_video ) flashvars.poster = options.poster || element.attr('poster') || false;
 			
 			
@@ -74,47 +74,70 @@
 			
 			swf_wrapper.append(jQuery(embed_html));
 			flash_api = document.getElementById(domid + "_fallback");
+
+			bridge.play = function(){ 
+					flash_api.playMedia();
+					return true;
+				};
+			bridge.pause= function(){
+					flash_api.pauseMedia();
+					return true;
+				};
+				
+			bridge.load= function(){
+					flash_api.loadMedia();
+					return true;
+				};
+		
+			bridge.stop = function(){
+					flash_api.stopMedia();
+					return true;
+				};
+			
 			
 			if (Object.prototype.__defineGetter__&&!Object.defineProperty) {
 			   Object.defineProperty=function(obj,prop,desc) {
 			      if ("get" in desc) obj.__defineGetter__(prop,desc.get);
 			      if ("set" in desc) obj.__defineSetter__(prop,desc.set);
 			   };
-			};
+			}
 			
-			Object.defineProperty(flash_api, 'paused', {
+			Object.defineProperty(bridge, 'paused', {
 				get: function(){  return flash_api.getPaused(); },
 				set: function(value){ flash_api.setPaused(value); }
 			});
 			
-			Object.defineProperty(flash_api, 'muted', {
+			Object.defineProperty(bridge, 'muted', {
 				get: function(){  return flash_api.getMuted(); },
 				set: function(value){ flash_api.setMuted(value); }
 			});
 			
-			Object.defineProperty(flash_api, 'currentTime', {
+			Object.defineProperty(bridge, 'currentTime', {
 				get: function(){  return flash_api.getCurrentTime(); },
 				set: function(value){ flash_api.setCurrentTime(value); }
 			});
 			
-			Object.defineProperty(flash_api, 'volume', {
+			Object.defineProperty(bridge, 'volume', {
 				get: function(){  return flash_api.getVolume(); },
 				set: function(value){ flash_api.setVolume(value); }
 			});
 			
-			Object.defineProperty(flash_api, 'seeking', {
+			Object.defineProperty(bridge, 'seeking', {
 				get: function(){  return flash_api.getSeeking(); }
 			});
 			
-			Object.defineProperty(flash_api, 'duration', {
+			Object.defineProperty(bridge, 'duration', {
 				get: function(){  return flash_api.getDuration(); }
 			});
 			
-			Object.defineProperty(flash_api, 'played', {
+			Object.defineProperty(bridge, 'played', {
 				get: function(){  return flash_api.getPlayed(); }
 			});
-
-			api = flash_api;
+			
+			Object.defineProperty(bridge, 'src', {
+				get: function(){  return flash_api.getSrc(); },
+				set: function(){  return flash_api.setSrc(); }
+			});
 		}
 		
 		control_pane = jQuery('<div class="'+ media_type +'-player-controls"></div>');
@@ -153,26 +176,26 @@
 				.attr("aria-controls", domid);
 								
 			controls.play_button.bind('click.media', function(event){
-					if( api.paused ) api.play();
-					else api.pause();
+					if( bridge.paused ) bridge.play();
+					else bridge.pause();
 					control_pane.trigger('playing.media', [domid]);
 					return true;
 				});
 
 			controls.seek_bar.bind('change.media', function(event){
-				api.currentTime = jQuery(this).val();
+				bridge.currentTime = jQuery(this).val();
 				return true;
 			});
 			
 			controls.mute_button.bind('click.media', function(event){
-				api.muted = !api.muted;
-				if( api.muted === true ) jQuery(this).html("UnMute").addClass('muted');
+				bridge.muted = !bridge.muted;
+				if( bridge.muted === true ) jQuery(this).html("UnMute").addClass('muted');
 				else jQuery(this).html("Mute").removeClass('muted');				
 				return false;
 			});
 			
 			controls.volume_bar.bind('change.media', function(event){
-				api.volume = jQuery(this).val();
+				bridge.volume = jQuery(this).val();
 				return false;
 			});
 				
@@ -226,16 +249,16 @@
 			.bind('loadedmetadata.media', 
 				function(event, pid){
 					if( pid != domid ) return true;					
-					controls.seek_bar.attr('max', root_element.duration);
+					controls.seek_bar.attr('max', bridge.duration);
 					return true;
 				})
 			.bind('timeupdate.media', 
 				function(event){
 					if( controls.time_display ){
 						controls.time_display.text(
-							seconds_to_time(api.currentTime) 
+							seconds_to_time(bridge.currentTime) 
 							+ ":" 
-							+ seconds_to_time(api.duration)
+							+ seconds_to_time(bridge.duration)
 						);
 					}
 				});
@@ -243,14 +266,14 @@
 		
 		function media_state_changed( event, pid ){
 			if( pid != domid ) return true;
-			if( api.paused ) controls.play_button.html("Play").addClass('paused');
+			if( bridge.paused ) controls.play_button.html("Play").addClass('paused');
 			else controls.play_button.html("Pause").removeClass('paused');
 			return true;
 		}
 		
 		function update_progress( event, pid ){
 			if( pid != domid ) return true;					
-			controls.seek_bar.val(api.currentTime);
+			controls.seek_bar.val(bridge.currentTime);
 			return true;
 		}
 
@@ -261,7 +284,7 @@
 		});
 		
 		
-		return api;
+		return bridge;
 			
 	};
 	

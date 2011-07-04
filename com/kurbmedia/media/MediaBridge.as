@@ -26,13 +26,14 @@ package com.kurbmedia.media{
 			Security.allowDomain("*");
 			params = root.loaderInfo.parameters;
 			
-			/*if( !params.src ){
-				params = {};
-				params.src = "http://cdn.hannahkeeley.com/promotions/boot_camp/boot_camp_day2.mp4";
-				params.media_type = 'video';
-			}*/
-			
-			
+/*					if( !params.src ){
+							params = {};
+							params.debug = true;
+							params.src = "http://cdn.hannahkeeley.com/promotions/boot_camp/boot_camp_day2.mp4";
+							params.media_type = 'video';
+						}
+					
+					*/
 			stage.align     = StageAlign.TOP_LEFT;
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			rect.width 		= stage.stageWidth;
@@ -43,10 +44,17 @@ package com.kurbmedia.media{
 			
 			trace(params.src);
 			
+			if( !params.debug ){ 
+				removeChild(getChildByName('debug_text'));
+			}else{
+				debug_text.x = stage.stageWidth - debug_text.width;
+				debug_text.y = stage.stageHeight - debug_text.height;
+			}
+			
 			if( isNaN(params.update_interval) ) params.update_interval = 250;
 			
 			player = detect_player();
-			addChild(player);
+			addChildAt(player, 0);
 			
 			if( player.is_video ){
 				player.player.width  	    = stage.stageWidth;
@@ -54,29 +62,34 @@ package com.kurbmedia.media{
 				player.player.smoothing 	= true;
 			}
 
-			ExternalInterface.marshallExceptions = true;
-			ExternalInterface.addCallback("play", player.play);
-			ExternalInterface.addCallback("load", player.load);
-			ExternalInterface.addCallback("pause", player.pause);
-			ExternalInterface.addCallback("stop", player.stop);
-			ExternalInterface.addCallback("setMuted", player.setMuted);			
-			ExternalInterface.addCallback('setCurrentTime', player.setCurrentTime);
-			ExternalInterface.addCallback('getCurrentTime', player.getCurrentTime);
-			ExternalInterface.addCallback('getDuration', player.getDuration);
-			ExternalInterface.addCallback('getEnded', player.getEnded);
-			ExternalInterface.addCallback('getPaused', player.getPaused);
-			ExternalInterface.addCallback('setPaused', player.setPaused);
-			ExternalInterface.addCallback('getPlayed', player.getPlayed);
-			ExternalInterface.addCallback('getSeeking', player.getSeeking);
-			ExternalInterface.addCallback('setSrc', player.setSrc);
-			ExternalInterface.addCallback('getSrc', player.getSrc);
-			ExternalInterface.addCallback('getVolume', player.getVolume);
-			ExternalInterface.addCallback('setVolume', player.setVolume);
+			if( ExternalInterface.available ){
+				ExternalInterface.marshallExceptions = true;
+				ExternalInterface.addCallback("playMedia", player.play);
+				ExternalInterface.addCallback("loadMedia", player.load);
+				ExternalInterface.addCallback("pauseMedia", player.pause);
+				ExternalInterface.addCallback("stopMedia", player.stop);
+				ExternalInterface.addCallback("setMuted", player.setMuted);			
+				ExternalInterface.addCallback('setCurrentTime', player.setCurrentTime);
+				ExternalInterface.addCallback('getCurrentTime', player.getCurrentTime);
+				ExternalInterface.addCallback('getDuration', player.getDuration);
+				ExternalInterface.addCallback('getEnded', player.getEnded);
+				ExternalInterface.addCallback('getPaused', player.getPaused);
+				ExternalInterface.addCallback('setPaused', player.setPaused);
+				ExternalInterface.addCallback('getPlayed', player.getPlayed);
+				ExternalInterface.addCallback('getSeeking', player.getSeeking);
+				ExternalInterface.addCallback('setSrc', player.setSrc);
+				ExternalInterface.addCallback('getSrc', player.getSrc);
+				ExternalInterface.addCallback('getVolume', player.getVolume);
+				ExternalInterface.addCallback('setVolume', player.setVolume);
+				ExternalInterface.addCallback('callSetter', call_setter);
+				ExternalInterface.addCallback('callGetter', call_getter);
+			}
+			
 			
 			stage.addEventListener(MouseEvent.CLICK, function(){ player.play(); });
 			stage.addEventListener(MouseEvent.ROLL_OVER, dispatch);
 			stage.addEventListener(MouseEvent.ROLL_OUT, dispatch);
-			player.addEventListener(MediaEvent.LOADED_DATA, dispatch);
+			player.addEventListener(MediaEvent.LOADEDDATA, dispatch);
 			player.addEventListener(MediaEvent.PROGRESS, dispatch);
 			player.addEventListener(MediaEvent.TIMEUPDATE, dispatch);
 			player.addEventListener(MediaEvent.SEEKED, dispatch);
@@ -94,6 +107,15 @@ package com.kurbmedia.media{
 
 		}
 		
+		public function call_setter( name, value ){
+			player['set' + name].apply(player, value);
+			return value;
+		}
+		
+		public function call_getter( name ){
+			return player['get' + name].apply(player);
+		}
+		
 		private function dispatch(event:*){			
 			var to_send = false;
 			switch( event.type ){
@@ -103,7 +125,11 @@ package com.kurbmedia.media{
 				to_send = 'mouseout';
 				break;
 				default: to_send = event.type;
-			}		
+			}	
+			
+			if(params.debug){
+				debug_text.text = to_send;
+			}	
 
 			if( ExternalInterface.available ){
 				ExternalInterface.call("setTimeout", "jQuery('#"+ element +"').trigger('"+ to_send +"', ['"+ element +"'])", 0);

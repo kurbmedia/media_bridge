@@ -4,7 +4,6 @@ package com.kurbmedia.media{
 		
 	public class MediaEvent extends Event{
 		
-		public static const LOADED_DATA:String 		= "loadeddata";
 		public static const PROGRESS:String 		= "progress";
 		public static const TIMEUPDATE:String 		= "timeupdate";
 		public static const SEEKED:String 			= "seeked";
@@ -15,6 +14,7 @@ package com.kurbmedia.media{
 		public static const ENDED:String 			= "ended";
 		public static const VOLUMECHANGE:String 	= "volumechange";
 		public static const STOP:String 			= "stop";
+		public static const ERROR:String 			= "error";
 		public static const LOADSTART:String 		= "loadstart";
 		public static const CANPLAY:String 			= "canplay";
 		public static const LOADEDDATA:String 		= "loadeddata";

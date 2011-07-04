@@ -23,7 +23,7 @@ Because all of the existing "HTML5 players" always felt bloated. For instance, m
 ( supporting the obvious f4v with flash ). Until the HTML5 spec is more solid and people can agree on a standard video format, 
 this covers just about every possible scenario. If you'd like to support ogg, webm, blah blah, use something else. In our 
 day to day work though, creating 4-5 different versions of the same video just to pat ourselves on the back and say "look we made HTML5!" 
-just isn't that big of a deal.
+just isn't that big of a deal. 
 
 We do however like the ability to skin a player with pure HTML/CSS. This makes it much easier to mesh into any site, and any situation. 
 YouTube player support is also planned in the near future. 

@@ -91,8 +91,7 @@ package com.kurbmedia.media.players{
 				_played = true;
 			}else{				
 				play_when_loaded;
-				//if( is_connected === false ) this.load();
-				this.load();
+				if( is_connected === false ) this.load();				
 			}
 		}
 		
@@ -191,10 +190,12 @@ package com.kurbmedia.media.players{
 		
 		private function handle_error_status(event:*){
 			trace("NetStream Error: " + event);
+			dispatchEvent(new MediaEvent(MediaEvent.ERROR));
 		}
 		
 		private function handle_async_error(event:*){
 			trace("AsyncError: " + event);
+			dispatchEvent(new MediaEvent(MediaEvent.ERROR));
 		}
 		
 	}
