@@ -79,8 +79,8 @@
 			   Object.defineProperty=function(obj,prop,desc) {
 			      if ("get" in desc) obj.__defineGetter__(prop,desc.get);
 			      if ("set" in desc) obj.__defineSetter__(prop,desc.set);
-			   }
-			}
+			   };
+			};
 			
 			Object.defineProperty(flash_api, 'paused', {
 				get: function(){  return flash_api.getPaused(); },
@@ -103,15 +103,15 @@
 			});
 			
 			Object.defineProperty(flash_api, 'seeking', {
-				get: function(){  return flash_api.getSeeking(); },
+				get: function(){  return flash_api.getSeeking(); }
 			});
 			
 			Object.defineProperty(flash_api, 'duration', {
-				get: function(){  return flash_api.getDuration(); },
+				get: function(){  return flash_api.getDuration(); }
 			});
 			
 			Object.defineProperty(flash_api, 'played', {
-				get: function(){  return flash_api.getPlayed(); },
+				get: function(){  return flash_api.getPlayed(); }
 			});
 
 			api = flash_api;
@@ -261,7 +261,7 @@
 		});
 		
 		
-		return self;
+		return api;
 			
 	};
 	
